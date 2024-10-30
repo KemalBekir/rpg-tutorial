@@ -6,13 +6,15 @@ import (
 )
 
 type TilemapLayerJSON struct {
-	Data   []int `json:"data"`
-	Width  int   `json:"width"`
-	Height int   `json:"height"`
+	Data   []int  `json:"data"`
+	Width  int    `json:"width"`
+	Height int    `json:"height"`
+	Name   string `json:"name"`
 }
 
 type TileMapJSON struct {
-	Layers []TilemapLayerJSON `json:"layers"`
+	Layers   []TilemapLayerJSON        `json:"layers"`
+	Tilesets map[string]map[string]any `json:"tilesets"`
 }
 
 func NewTilemapJSON(filepath string) (*TileMapJSON, error) {
