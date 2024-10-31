@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"image"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -26,8 +27,8 @@ type UniformTileset struct {
 func (u *UniformTileset) Img(id int) *ebiten.Image {
 	id -= u.gid
 
-	srcX := (id - 1) % 22
-	srcY := (id - 1) / 22
+	srcX := id % 22
+	srcY := id / 22
 
 	srcX *= 16
 	srcY *= 16
@@ -80,7 +81,14 @@ func NewTileset(path string, gid int) (Tileset, error) {
 		dynTileset.imgs = make([]*ebiten.Image, 0)
 
 		for _, tileJSON := range dynTilesetJSON.Tiles {
-			img, _, err := ebitenutil.NewImageFromFile(tileJSON.Path)
+			tileJSONPath := tileJSON.Path
+			tileJSONPath = filepath.Clean(tileJSONPath)
+			tileJSONPath = strings.ReplaceAll(tileJSONPath, "\\", "/")
+			tileJSONPath = strings.TrimPrefix(tileJSONPath, "../")
+			tileJSONPath = strings.TrimPrefix(tileJSONPath, "../")
+			tileJSONPath = filepath.Join("assets/", tileJSONPath)
+
+			img, _, err := ebitenutil.NewImageFromFile(tileJSONPath)
 			if err != nil {
 				return nil, err
 			}
@@ -101,7 +109,14 @@ func NewTileset(path string, gid int) (Tileset, error) {
 
 	uniformTileset := UniformTileset{}
 
-	img, _, err := ebitenutil.NewImageFromFile(uniformTilesetJSON.Path)
+	tileJSONPath := uniformTilesetJSON.Path
+	tileJSONPath = filepath.Clean(tileJSONPath)
+	tileJSONPath = strings.ReplaceAll(tileJSONPath, "\\", "/")
+	tileJSONPath = strings.TrimPrefix(tileJSONPath, "../")
+	tileJSONPath = strings.TrimPrefix(tileJSONPath, "../")
+	tileJSONPath = filepath.Join("assets/", tileJSONPath)
+
+	img, _, err := ebitenutil.NewImageFromFile(tileJSONPath)
 	if err != nil {
 		return nil, err
 	}
