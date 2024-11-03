@@ -70,10 +70,10 @@ func (g *Game) Update() error {
 	g.player.Dy = 0.0
 	// react to key presses
 
-	if ebiten.IsKeyPressed(ebiten.KeyRight) {
+	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
 		g.player.Dx = -2
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+	if ebiten.IsKeyPressed(ebiten.KeyRight) {
 		g.player.Dx = 2
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {

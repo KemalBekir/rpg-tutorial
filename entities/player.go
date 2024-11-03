@@ -27,11 +27,11 @@ func (p *Player) ActiveAnimation(dx, dy int) *animations.Animation {
 	}
 
 	if dy > 0 {
-		return p.Animations[Right]
+		return p.Animations[Down]
 	}
 
 	if dy < 0 {
-		return p.Animations[Left]
+		return p.Animations[Up]
 	}
 	return nil
 }
