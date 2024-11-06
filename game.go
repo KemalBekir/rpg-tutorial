@@ -1,16 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"log"
 	"rpg-tutorial/animations"
+	"rpg-tutorial/constants"
 	"rpg-tutorial/entities"
 	"rpg-tutorial/spritesheet"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
@@ -61,7 +62,7 @@ func NewGame() *Game {
 
 	playerSpriteSheet := spritesheet.NewSpriteSheet(4, 7, 16)
 
-	game := Game{
+	return &Game{
 		player: &entities.Player{
 			Sprite: &entities.Sprite{Img: playerImg,
 				X: 50.0,
@@ -120,7 +121,6 @@ func NewGame() *Game {
 			image.Rect(100, 100, 116, 116),
 		},
 	}
-	return &game
 }
 
 func (g *Game) Update() error {
@@ -180,13 +180,47 @@ func (g *Game) Update() error {
 		CheckCollisionVertical(sprite.Sprite, g.colliders)
 	}
 
-	for _, potion := range g.potions {
-		if g.player.X > potion.X {
-			g.player.Health += potion.AmtHeal
-			fmt.Printf("Picked up potion! Health: %d\n", g.player.Health)
+	clicked := inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0)
+	cX, cY := ebiten.CursorPosition()
 
+	deadEenemies := make(map[int]struct{})
+	for index, enemy := range g.enemies {
+		rect := image.Rect(
+			int(enemy.X),
+			int(enemy.Y),
+			int(enemy.X)+constants.Tilesize,
+			int(enemy.Y)+constants.Tilesize,
+		)
+
+		// is cursor in rect?
+		if cX > rect.Min.X && cX < rect.Max.X && cY > rect.Min.Y && cY < rect.Max.Y {
+			if clicked {
+				enemy.CombatComp.Damage(g.player.CombatComp.AttackPower())
+
+				if enemy.CombatComp.Health() <= 0 {
+					deadEenemies[index] = struct{}{}
+				}
+			}
 		}
 	}
+
+	if len(deadEenemies) > 0 {
+		newEnemies := make([]*entities.Enemy, 0)
+		for index, enemy := range g.enemies {
+			if _, exists := deadEenemies[index]; !exists {
+				newEnemies = append(newEnemies, enemy)
+			}
+		}
+
+		g.enemies = newEnemies
+	}
+	// for _, potion := range g.potions {
+	// 	if g.player.X > potion.X {
+	// 		g.player.Health += potion.AmtHeal
+	// 		fmt.Printf("Picked up potion! Health: %d\n", g.player.Health)
+
+	// 	}
+	// }
 
 	g.cam.FollowTarger(g.player.X+8, g.player.Y+8, 320, 240)
 	g.cam.Constrain(

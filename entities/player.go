@@ -1,6 +1,9 @@
 package entities
 
-import "rpg-tutorial/animations"
+import (
+	"rpg-tutorial/animations"
+	"rpg-tutorial/components"
+)
 
 type PlayerState uint8
 
@@ -15,6 +18,7 @@ type Player struct {
 	*Sprite
 	Health     uint
 	Animations map[PlayerState]*animations.Animation
+	CombatComp *components.BasicCombat
 }
 
 func (p *Player) ActiveAnimation(dx, dy int) *animations.Animation {
