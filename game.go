@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"log"
 	"rpg-tutorial/animations"
+	"rpg-tutorial/components"
 	"rpg-tutorial/constants"
 	"rpg-tutorial/entities"
 	"rpg-tutorial/spritesheet"
@@ -75,6 +77,7 @@ func NewGame() *Game {
 				entities.Left:  animations.NewAnimation(6, 14, 4, 20.0),
 				entities.Right: animations.NewAnimation(7, 15, 4, 20.0),
 			},
+			CombatComp: components.NewBasicCombat(3, 1),
 		},
 		playerSpriteSheet: playerSpriteSheet,
 		enemies: []*entities.Enemy{
@@ -85,6 +88,7 @@ func NewGame() *Game {
 					Y:   100.0,
 				},
 				FollowsPlayer: true,
+				CombatComp:    components.NewBasicCombat(3, 1),
 			},
 			{
 				Sprite: &entities.Sprite{
@@ -93,6 +97,7 @@ func NewGame() *Game {
 					Y:   150.0,
 				},
 				FollowsPlayer: false,
+				CombatComp:    components.NewBasicCombat(3, 1),
 			},
 			{
 				Sprite: &entities.Sprite{
@@ -101,6 +106,7 @@ func NewGame() *Game {
 					Y:   75.0,
 				},
 				FollowsPlayer: true,
+				CombatComp:    components.NewBasicCombat(3, 1),
 			},
 		},
 		potions: []*entities.Potion{
@@ -195,10 +201,13 @@ func (g *Game) Update() error {
 		// is cursor in rect?
 		if cX > rect.Min.X && cX < rect.Max.X && cY > rect.Min.Y && cY < rect.Max.Y {
 			if clicked {
+				fmt.Println("damaging enemy")
 				enemy.CombatComp.Damage(g.player.CombatComp.AttackPower())
 
 				if enemy.CombatComp.Health() <= 0 {
 					deadEenemies[index] = struct{}{}
+					fmt.Println("enemy has been eliminated")
+
 				}
 			}
 		}
