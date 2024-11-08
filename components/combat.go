@@ -4,7 +4,7 @@ type Combat interface {
 	Health() int
 	AttackPower() int
 	Attacking() bool
-	Attack()
+	Attack() bool
 	Update()
 	Damage(amount int)
 }
@@ -39,8 +39,9 @@ func (b *BasicCombat) Attacking() bool {
 	return b.attacking
 }
 
-func (b *BasicCombat) Attack() {
+func (b *BasicCombat) Attack() bool {
 	b.attacking = true
+	return true
 }
 
 func (b *BasicCombat) Update() {
@@ -49,6 +50,29 @@ func (b *BasicCombat) Update() {
 
 type EnemyCombat struct {
 	*BasicCombat
+	attackCooldown  int
+	timeSinceAttack int
+}
+
+func NewEnemyCombat(health, attackPower, attackCooldown int) *EnemyCombat {
+	return &EnemyCombat{
+		NewBasicCombat(health, attackPower),
+		attackCooldown,
+		0,
+	}
+}
+
+func (e *EnemyCombat) Attack() bool {
+	if e.timeSinceAttack >= e.attackCooldown {
+		e.attacking = true
+		e.timeSinceAttack = 0
+		return true
+	}
+	return false
+}
+
+func (e *EnemyCombat) Update() {
+	e.timeSinceAttack += 1
 }
 
 var _ Combat = (*BasicCombat)(nil)

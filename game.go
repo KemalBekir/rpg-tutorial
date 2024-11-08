@@ -88,7 +88,7 @@ func NewGame() *Game {
 					Y:   100.0,
 				},
 				FollowsPlayer: true,
-				CombatComp:    components.NewBasicCombat(3, 1),
+				CombatComp:    components.NewEnemyCombat(3, 1, 30),
 			},
 			{
 				Sprite: &entities.Sprite{
@@ -97,7 +97,7 @@ func NewGame() *Game {
 					Y:   150.0,
 				},
 				FollowsPlayer: false,
-				CombatComp:    components.NewBasicCombat(3, 1),
+				CombatComp:    components.NewEnemyCombat(3, 1, 30),
 			},
 			{
 				Sprite: &entities.Sprite{
@@ -106,7 +106,7 @@ func NewGame() *Game {
 					Y:   75.0,
 				},
 				FollowsPlayer: true,
-				CombatComp:    components.NewBasicCombat(3, 1),
+				CombatComp:    components.NewEnemyCombat(3, 1, 30),
 			},
 		},
 		potions: []*entities.Potion{
@@ -188,9 +188,11 @@ func (g *Game) Update() error {
 
 	clicked := inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0)
 	cX, cY := ebiten.CursorPosition()
+	g.player.CombatComp.Update()
 
 	deadEenemies := make(map[int]struct{})
 	for index, enemy := range g.enemies {
+		enemy.CombatComp.Update()
 		rect := image.Rect(
 			int(enemy.X),
 			int(enemy.Y),
