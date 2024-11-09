@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"log"
+	"math"
 	"rpg-tutorial/animations"
 	"rpg-tutorial/components"
 	"rpg-tutorial/constants"
@@ -188,7 +189,15 @@ func (g *Game) Update() error {
 
 	clicked := inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0)
 	cX, cY := ebiten.CursorPosition()
+	cX += int(g.cam.X)
+	cY -= int(g.cam.Y)
 	g.player.CombatComp.Update()
+	pRect := image.Rect(
+		int(g.player.Y),
+		int(g.player.X),
+		int(g.player.X)+constants.Tilesize,
+		int(g.player.Y)+constants.Tilesize,
+	)
 
 	deadEenemies := make(map[int]struct{})
 	for index, enemy := range g.enemies {
@@ -200,9 +209,28 @@ func (g *Game) Update() error {
 			int(enemy.Y)+constants.Tilesize,
 		)
 
+		// if enemy overlaps player
+		if rect.Overlaps(pRect) {
+			if enemy.CombatComp.Attack() {
+				g.player.CombatComp.Damage(enemy.CombatComp.AttackPower())
+				fmt.Println(fmt.Sprintf("player damaged. health: %d\n", g.player.Health))
+				if g.player.CombatComp.Health() <= 0 {
+					fmt.Println("player has died!")
+				}
+			}
+		}
+
 		// is cursor in rect?
 		if cX > rect.Min.X && cX < rect.Max.X && cY > rect.Min.Y && cY < rect.Max.Y {
-			if clicked {
+			if clicked &&
+				math.Sqrt(
+					math.Pow(
+						float64(cX)-g.player.X+(constants.Tilesize/2),
+						2)+math.Pow(
+						float64(cY)-g.player.Y+(constants.Tilesize/2),
+						2,
+					),
+				) < constants.Tilesize*5 {
 				fmt.Println("damaging enemy")
 				enemy.CombatComp.Damage(g.player.CombatComp.AttackPower())
 
